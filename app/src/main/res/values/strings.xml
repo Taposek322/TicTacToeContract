@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">TicTacToeContract</string>
+    <string name="x_figure">X</string>
+    <string name="o_figure">O</string>
+</resources>
