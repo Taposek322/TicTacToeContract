@@ -1,4 +1,4 @@
-package com.taposek322.tictactoecontract.presentation.ui.theme
+package com.taposek322.tictactoecontract.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

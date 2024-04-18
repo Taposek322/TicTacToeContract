@@ -1,4 +1,4 @@
-package com.taposek322.tictactoecontract.presentation.ui.theme
+package com.taposek322.tictactoecontract.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

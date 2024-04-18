@@ -2,4 +2,17 @@
     <string name="app_name">TicTacToeContract</string>
     <string name="x_figure">X</string>
     <string name="o_figure">O</string>
+    <string name="unknown_error_message">An unknown error occurred.</string>
+    <string name="connection_to_web_error">Error. Can`t connect to web</string>
+    <string name="connect_button_name">Connect</string>
+    <string name="urladdress_textfield_name">URL-address</string>
+    <string name="chaindid_textfiled_name">Chain ID</string>
+    <string name="privatekey_textfield_name">Private key</string>
+    <string name="createGame_button_name">Create game</string>
+    <string name="joinGame_button_name">Join game</string>
+    <string name="expectedPlayer_hint">Address of expected player</string>
+    <string name="ethAmount_hint">Amount of ether to transfer</string>
+    <string name="waiting_second_player">Waiting for second player to join game</string>
+    <string name="contract_address_text">Address of contract to join:</string>
+    <string name="contract_address_hint">Contract address</string>
 </resources>
