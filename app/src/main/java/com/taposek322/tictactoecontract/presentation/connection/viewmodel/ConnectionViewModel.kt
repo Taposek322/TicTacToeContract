@@ -1,5 +1,6 @@
 package com.taposek322.tictactoecontract.presentation.connection.viewmodel
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -7,8 +8,10 @@ import androidx.lifecycle.ViewModel
 import com.taposek322.tictactoecontract.R
 import com.taposek322.tictactoecontract.domain.repository.EtherRepository
 import com.taposek322.tictactoecontract.domain.util.Resource
+import com.taposek322.tictactoecontract.domain.validation.ValidationClass
 import com.taposek322.tictactoecontract.presentation.util.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -21,16 +24,29 @@ private const val tag = "ConnectionViewModel"
 
 @HiltViewModel
 class ConnectionViewModel @Inject constructor(
-    private val rep: EtherRepository
+    @ApplicationContext private val context:Context,
+    private val rep: EtherRepository,
+    private val validation:ValidationClass
 ):ViewModel() {
 
     var connectionString by mutableStateOf("http://194.59.40.99:8545/")
         private set
 
+    var connectionStringValidationErrorMessage:String? by mutableStateOf(null)
+        private set
+
+
     var chainId by mutableStateOf("51515")
         private set
+    var chainIdValidationErrorMessage:String? by mutableStateOf(null)
+        private set
+
+
     var privateKey by mutableStateOf("")
         private set
+    var privateKeyValidationErrorMessage:String? by mutableStateOf(null)
+        private set
+
 
     var loading by mutableStateOf(false)
         private set
@@ -62,22 +78,48 @@ class ConnectionViewModel @Inject constructor(
         success = false
         error = false
         loading = true
-        CoroutineScope(Dispatchers.IO).launch{
-            val result = rep.connectToWeb(
-                connectionString = connectionString,
-                chainId = chainId.toLong(),
-                privateKey = privateKey
-            )
-            when(result){
-                is Resource.Success->{
-                    success = true
-                }
-                is Resource.Error->{
-                    errorChannel.send(result.message?:UiText.StringResource(R.string.unknown_error_message))
-                    error = true
-                }
-            }
+        connectionStringValidationErrorMessage = null
+        chainIdValidationErrorMessage = null
+        privateKeyValidationErrorMessage = null
+        val connectionStringError = validation.validateEmptyString(connectionString)
+        var chainIdError = validation.validateEmptyString(chainId)
+        if (chainIdError is Resource.Success){
+            chainIdError = validation.validateNumberField(chainId)
+        }
+        val privateKeyError = validation.validateEmptyString(privateKey)
+        val hasError = listOf(
+            connectionStringError,
+            chainIdError,
+            privateKeyError,
+        ).any {
+            it is Resource.Error
+        }
+        if(hasError){
+            connectionStringValidationErrorMessage = connectionStringError.message?.asString(context = context)
+            chainIdValidationErrorMessage = chainIdError.message?.asString(context = context)
+            privateKeyValidationErrorMessage = privateKeyError.message?.asString(context = context)
             loading = false
+        }else {
+            CoroutineScope(Dispatchers.IO).launch {
+                val result = rep.connectToWeb(
+                    connectionString = connectionString,
+                    chainId = chainId.toLong(),
+                    privateKey = privateKey
+                )
+                when (result) {
+                    is Resource.Success -> {
+                        success = true
+                    }
+
+                    is Resource.Error -> {
+                        errorChannel.send(
+                            result.message ?: UiText.StringResource(R.string.unknown_error_message)
+                        )
+                        error = true
+                    }
+                }
+                loading = false
+            }
         }
     }
 

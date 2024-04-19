@@ -1,43 +1,28 @@
 package com.taposek322.tictactoecontract.presentation.connection.ui
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.taposek322.tictactoecontract.Navigation.NavRouts
 import com.taposek322.tictactoecontract.R
-import com.taposek322.tictactoecontract.data.repository.EtherRepositoryImpl
 import com.taposek322.tictactoecontract.presentation.connection.viewmodel.ConnectionViewModel
-import org.web3j.crypto.Credentials
-import org.web3j.protocol.Web3j
-import org.web3j.protocol.core.methods.response.Web3ClientVersion
-import org.web3j.protocol.http.HttpService
-import org.web3j.tx.RawTransactionManager
-import org.web3j.tx.TransactionManager
 
 
 @Composable
@@ -62,6 +47,9 @@ fun ConnectionScreenRoot(
         connectionString = viewModel.connectionString,
         chainId = viewModel.chainId,
         privateKey = viewModel.privateKey,
+        connectionStringErrorMessage = viewModel.connectionStringValidationErrorMessage,
+        chainIdStringErrorMessage = viewModel.chainIdValidationErrorMessage,
+        privateKeyStringErrorMessage = viewModel.privateKeyValidationErrorMessage,
         connectionStringHint = stringResource(id = R.string.urladdress_textfield_name),
         chainIdHint = stringResource(id = R.string.chaindid_textfiled_name),
         privateKeyHint = stringResource(id = R.string.privatekey_textfield_name),
@@ -93,6 +81,9 @@ fun ConnectionScreen(
     connectionStringHint:String,
     chainIdHint:String,
     privateKeyHint:String,
+    connectionStringErrorMessage:String?,
+    chainIdStringErrorMessage:String?,
+    privateKeyStringErrorMessage:String?,
     onConnectionStringChange:(String)->Unit,
     onChainIdStringChange:(String)->Unit,
     onPrivateKeyStringChange:(String)->Unit,
@@ -110,10 +101,24 @@ fun ConnectionScreen(
             .fillMaxSize()
     )
     {
-
-        ConnectionInputField(inputValue = connectionString, hint = connectionStringHint, onValueChange = onConnectionStringChange)
-        ConnectionInputField(inputValue = chainId, hint = chainIdHint, onValueChange = onChainIdStringChange)
-        ConnectionInputField(inputValue = privateKey, hint = privateKeyHint, onValueChange = onPrivateKeyStringChange)
+        ConnectionInputField(
+            inputValue = connectionString,
+            hint = connectionStringHint,
+            errorMessage = connectionStringErrorMessage,
+            onValueChange = onConnectionStringChange,
+        )
+        ConnectionInputField(
+            inputValue = chainId,
+            hint = chainIdHint,
+            errorMessage = chainIdStringErrorMessage,
+            onValueChange = onChainIdStringChange,
+        )
+        ConnectionInputField(
+            inputValue = privateKey,
+            hint = privateKeyHint,
+            errorMessage = privateKeyStringErrorMessage,
+            onValueChange = onPrivateKeyStringChange,
+        )
 
         Button(
             enabled = !loading,
@@ -139,23 +144,36 @@ fun ConnectionScreen(
 fun ConnectionInputField(
     inputValue:String,
     hint:String,
+    errorMessage:String?,
     onValueChange:(String)->Unit,
     modifier: Modifier = Modifier
 ){
-    OutlinedTextField(
-        value = inputValue,
-        onValueChange = {onValueChange(it)},
-        placeholder = {
-            Text(
-                text = hint,
-                modifier = modifier
-            )
-        },
-        singleLine = true,
+    Column(
         modifier = modifier
-            .fillMaxWidth()
             .padding(10.dp)
-    )
+    ) {
+        OutlinedTextField(
+            value = inputValue,
+            onValueChange = {onValueChange(it)},
+            placeholder = {
+                Text(
+                    text = hint,
+                    modifier = modifier
+                )
+            },
+            singleLine = true,
+            modifier = modifier
+                .fillMaxWidth()
+        )
+        if(errorMessage!=null){
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                modifier = modifier
+                    .align(Alignment.End)
+            )
+        }
+    }
 }
 private fun ConnectionScreenPreview(){
 

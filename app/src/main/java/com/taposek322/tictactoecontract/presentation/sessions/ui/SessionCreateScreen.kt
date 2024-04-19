@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,8 +46,10 @@ fun SessionCreateScreenRoot(
     SessionCreateScreen(
         expectedPlayer2 = viewModel.expectedPlayer2,
         expectedPlayer2Hint = stringResource(id = R.string.expectedPlayer_hint),
+        expectedPlayer2ErrorMessage = viewModel.expectedPlayer2ErrorMessage,
         ethAmount = viewModel.ethAmount,
         ethAmountHint = stringResource(id = R.string.ethAmount_hint),
+        ethAmountErrorMessage = viewModel.ethAmountErrorMessage,
         onExpectedPlayer2Change = viewModel::changeExpectedPlayer,
         onEthAmountChange = viewModel::changeEthAmount,
         loading = viewModel.loading,
@@ -58,7 +61,7 @@ fun SessionCreateScreenRoot(
                 viewModel.clear()
                 launchSingleTop = true
             }
-        }
+        },
     )
 }
 
@@ -66,8 +69,10 @@ fun SessionCreateScreenRoot(
 fun SessionCreateScreen(
     expectedPlayer2:String,
     expectedPlayer2Hint:String,
+    expectedPlayer2ErrorMessage:String?,
     ethAmount:String,
     ethAmountHint:String,
+    ethAmountErrorMessage:String?,
     onExpectedPlayer2Change:(String)->Unit,
     onEthAmountChange:(String)->Unit,
     loading:Boolean,
@@ -87,6 +92,7 @@ fun SessionCreateScreen(
         SessionCreateInputField(
             inputValue = expectedPlayer2,
             hint = expectedPlayer2Hint,
+            errorMessage = expectedPlayer2ErrorMessage,
             onValueChange = {
                 onExpectedPlayer2Change(it)
             },
@@ -94,9 +100,10 @@ fun SessionCreateScreen(
         SessionCreateInputField(
             inputValue = ethAmount,
             hint = ethAmountHint,
+            errorMessage = ethAmountErrorMessage,
             onValueChange = {
                 onEthAmountChange(it)
-            }
+            },
         )
 
         Button(
@@ -123,23 +130,36 @@ fun SessionCreateScreen(
 fun SessionCreateInputField(
     inputValue:String,
     hint:String,
+    errorMessage:String?,
     onValueChange:(String)->Unit,
     modifier: Modifier = Modifier
 ){
-    OutlinedTextField(
-        value = inputValue,
-        onValueChange = {onValueChange(it)},
-        placeholder = {
-            Text(
-                text = hint,
-                modifier = modifier
-            )
-        },
-        singleLine = true,
+    Column(
         modifier = modifier
-            .fillMaxWidth()
             .padding(10.dp)
-    )
+    ) {
+        OutlinedTextField(
+            value = inputValue,
+            onValueChange = {onValueChange(it)},
+            placeholder = {
+                Text(
+                    text = hint,
+                    modifier = modifier
+                )
+            },
+            singleLine = true,
+            modifier = modifier
+                .fillMaxWidth()
+        )
+        if(errorMessage!=null){
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                modifier = modifier
+                    .align(Alignment.End)
+            )
+        }
+    }
 }
 
 @Preview
@@ -148,8 +168,10 @@ fun SessionCreateScreenPreview(){
     SessionCreateScreen(
         expectedPlayer2 = "",
         expectedPlayer2Hint = "Expected player",
+        expectedPlayer2ErrorMessage = "error",
         ethAmount = "",
         ethAmountHint = "Amount of ether to transfer",
+        ethAmountErrorMessage = null,
         onExpectedPlayer2Change = {},
         onEthAmountChange = {},
         loading = false,

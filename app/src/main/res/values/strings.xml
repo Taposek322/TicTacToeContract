@@ -15,4 +15,6 @@
     <string name="waiting_second_player">Waiting for second player to join game</string>
     <string name="contract_address_text">Address of contract to join:</string>
     <string name="contract_address_hint">Contract address</string>
+    <string name="empty_field_error_message">The field can`t be blank</string>
+    <string name="numeric_field_error">The field must contain only a decimal fraction</string>
 </resources>
