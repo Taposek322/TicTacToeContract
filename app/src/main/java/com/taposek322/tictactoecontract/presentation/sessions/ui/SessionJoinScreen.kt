@@ -58,9 +58,8 @@ fun SessionJoinScreenRoot(
         buttonName = stringResource(id = R.string.joinGame_button_name),
         navigate = {
             navController.navigate(NavRouts.game){
-                popUpTo(navController.graph.findStartDestination().id){
-                    inclusive = true
-                }
+                popUpTo(NavRouts.sessionChooseScreen)
+                viewModel.clear()
                 launchSingleTop = true
             }
         },

@@ -1,7 +1,12 @@
 package com.taposek322.tictactoecontract.domain.repository
 
+import com.taposek322.tictactoecontract.domain.gamefield.GameFieldEvent
+import com.taposek322.tictactoecontract.domain.gamefield.Player
 import com.taposek322.tictactoecontract.domain.util.Resource
+import com.taposek322.tictactoecontract.generated.TicTacToe
 import com.taposek322.tictactoecontract.presentation.util.UiText
+import io.reactivex.Flowable
+import org.web3j.protocol.core.DefaultBlockParameter
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -24,13 +29,15 @@ interface EtherRepository {
 
     suspend fun makeMove(position:BigInteger): Resource<UiText>
 
+    suspend fun getCurrentPlayer(): Resource<Player>
 
-    /*
-   suspend fun getEmployeeNum():Resource<BigInteger>
+    fun subscribeToGameCreatedEvents(): Flowable<TicTacToe.GameCreatedEventResponse>
 
-   suspend fun getEmploee(): Resource<EmployeeSalary.EmployeeRecord>
+    fun subscribeToPlayer2JoinedEvents(callback: () -> Unit)
 
-   suspend fun registerEmployee(name:String, age:BigInteger , amount:BigInteger,address:String):Resource
-    */
+    fun subscribeToMoveMadeEvents(callback:(GameFieldEvent)->Unit)
 
+    fun subscribeToGameFinishedEvents(callback: (String,Long) -> Unit)
+
+    fun getPlayerAddress():Player
 }

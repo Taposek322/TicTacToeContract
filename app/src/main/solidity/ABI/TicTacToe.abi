@@ -59,9 +59,15 @@
 			},
 			{
 				"indexed": false,
-				"internalType": "uint8",
+				"internalType": "uint256",
 				"name": "position",
-				"type": "uint8"
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
 			}
 		],
 		"name": "MoveMade",
@@ -172,6 +178,19 @@
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getCurrentPlayer",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",

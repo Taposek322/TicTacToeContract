@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.taposek322.tictactoecontract.R
 import com.taposek322.tictactoecontract.domain.repository.EtherRepository
 import com.taposek322.tictactoecontract.domain.util.Resource
@@ -15,6 +16,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -100,7 +102,7 @@ class ConnectionViewModel @Inject constructor(
             privateKeyValidationErrorMessage = privateKeyError.message?.asString(context = context)
             loading = false
         }else {
-            CoroutineScope(Dispatchers.IO).launch {
+            val connectionJob = CoroutineScope(Dispatchers.IO).launch {
                 val result = rep.connectToWeb(
                     connectionString = connectionString,
                     chainId = chainId.toLong(),
@@ -118,6 +120,18 @@ class ConnectionViewModel @Inject constructor(
                         error = true
                     }
                 }
+            }
+            val cancelJob = CoroutineScope(Dispatchers.IO).launch {
+                delay(120000)
+                connectionJob.cancel()
+                error = true
+                errorChannel.send(
+                    UiText.StringResource(R.string.timeout_exception_message)
+                )
+            }
+            viewModelScope.launch {
+                connectionJob.join()
+                cancelJob.join()
                 loading = false
             }
         }

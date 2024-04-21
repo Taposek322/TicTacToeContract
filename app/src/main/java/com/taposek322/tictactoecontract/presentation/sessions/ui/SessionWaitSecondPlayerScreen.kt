@@ -39,7 +39,8 @@ fun SessionWaitSecondPlayerScreenRoot(
             clipboardManager.setPrimaryClip(clipData)
         },
         navigate = {
-            navController.navigate(NavRouts.sessionWaitSecondPlayerScreen){
+            navController.navigate(NavRouts.game){
+                popUpTo(NavRouts.sessionChooseScreen)
                 viewModel.clear()
                 launchSingleTop = true
             }

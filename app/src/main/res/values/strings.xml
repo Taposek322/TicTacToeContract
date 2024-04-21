@@ -17,4 +17,12 @@
     <string name="contract_address_hint">Contract address</string>
     <string name="empty_field_error_message">The field can`t be blank</string>
     <string name="numeric_field_error">The field must contain only a decimal fraction</string>
+    <string name="timeout_exception_message">Operation waiting limit exceeded</string>
+    <string name="your_turn_message">Your turn</string>
+    <string name="opponent_turn_message">Opponent turn</string>
+    <string name="back_to_sessions_button_name">Back to session choice</string>
+    <string name="winner_message">You won!</string>
+    <string name="looser_message">You lose</string>
+    <string name="bet_amount_message">Bet: %1$d</string>
+    <string name="draw_message">Draw</string>
 </resources>

@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.taposek322.tictactoecontract.R
 import com.taposek322.tictactoecontract.domain.repository.EtherRepository
 import com.taposek322.tictactoecontract.domain.util.Resource
@@ -12,9 +13,11 @@ import com.taposek322.tictactoecontract.domain.validation.ValidationClass
 import com.taposek322.tictactoecontract.presentation.util.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -48,6 +51,11 @@ class JoinSessionViewModel @Inject constructor(
     private var errorChannel = Channel<UiText>()
     val errorMessage = errorChannel.receiveAsFlow()
 
+    private fun subscribeToSecondPlayerJoinGame(){
+        rep.subscribeToPlayer2JoinedEvents({
+            success = true
+        })
+    }
     fun changeContractAddress(value:String){
         contractAddress = value
     }
@@ -79,35 +87,41 @@ class JoinSessionViewModel @Inject constructor(
             ethAmountErrorMessage = ethAmountError.message?.asString(context = context)
             loading = false
         }else {
-            CoroutineScope(Dispatchers.IO).launch {
-                val loagContractRes = rep.connectToContract(contractAddress)
-                when (loagContractRes) {
+            val joinJob = CoroutineScope(Dispatchers.IO).launch {
+                val loadContractRes: Resource<UiText> = rep.connectToContract(contractAddress)
+                when (loadContractRes) {
                     is Resource.Success -> {
-                        val joinGameRes = rep.joinGame(contractAddress, ethAmount.toBigDecimal())
-                        when (joinGameRes) {
-                            is Resource.Success -> {
-                                success = true
-                            }
-
-                            is Resource.Error -> {
-                                errorChannel.send(
-                                    joinGameRes.message
-                                        ?: UiText.StringResource(R.string.unknown_error_message)
-                                )
-                                error = true;
-                            }
+                        subscribeToSecondPlayerJoinGame()
+                        val joinGameRes =
+                            rep.joinGame(contractAddress, ethAmount.toBigDecimal())
+                        if(joinGameRes  is Resource.Error) {
+                            errorChannel.send(
+                                joinGameRes.message
+                                    ?: UiText.StringResource(R.string.unknown_error_message)
+                            )
+                            error = true;
                         }
-
                     }
-
                     is Resource.Error -> {
                         errorChannel.send(
-                            loagContractRes.message
+                            loadContractRes.message
                                 ?: UiText.StringResource(R.string.unknown_error_message)
                         )
                         error = true;
                     }
                 }
+            }
+            val cancelJob = CoroutineScope(Dispatchers.IO).launch {
+                delay(120000)
+                joinJob.cancel()
+                error = true
+                errorChannel.send(
+                    UiText.StringResource(R.string.timeout_exception_message)
+                )
+            }
+            viewModelScope.launch {
+                joinJob.join()
+                cancelJob.join()
                 loading = false
             }
         }

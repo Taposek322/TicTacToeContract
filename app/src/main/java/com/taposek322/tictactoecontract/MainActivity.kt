@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
                         }
                         navigation(route = NavRouts.game, startDestination = NavRouts.gameScreen) {
                             composable(route = NavRouts.gameScreen) {
-                                TicTacToeScreenRoot(applicationContext)
+                                TicTacToeScreenRoot(applicationContext, navController)
                             }
                         }
                     }
